@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Alquileres</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --green: #2ecc71;
+    --yellow: #f1c40f;
+    --red: #e74c3c;
+    --text: #e8eaf0;
+    --text2: #8b90a7;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    position: fixed;
+    height: 100vh;
+  }
+
+  .logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .logo span {
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 500;
+  }
+
+  .nav {
+    padding: 24px 12px;
+    flex: 1;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent); color: white; }
+  .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+
+  .nav-label {
+    padding: 16px 24px 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text2);
+    font-weight: 600;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    padding: 32px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .header h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--text);
+  }
+
+  .header-sub {
+    color: var(--text2);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .stat-card.purple::before { background: var(--accent); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.red::before { background: var(--red); }
+
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 32px;
+    color: var(--text);
+  }
+
+  .stat-desc {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .table-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .search {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+  }
+
+  .search:focus { border-color: var(--accent); }
+  .search::placeholder { color: var(--text2); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    padding: 12px 24px;
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 14px 24px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge.green { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge.yellow { background: rgba(241,196,15,0.15); color: var(--yellow); }
+  .badge.red { background: rgba(231,76,60,0.15); color: var(--red); }
+  .badge.purple { background: rgba(108,99,255,0.15); color: var(--accent); }
+
+  .action-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 560px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .modal-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .modal-field .value {
+    font-size: 15px;
+    color: var(--text);
+    padding: 10px 14px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .modal-close {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    margin-top: 8px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .modal-sub {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* ALERT */
+  .alert {
+    background: rgba(231,76,60,0.1);
+    border: 1px solid rgba(231,76,60,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--red);
+  }
+
+  .empty {
+    text-align: center;
+    padding: 48px;
+    color: var(--text2);
+    font-size: 14px;
+  }
+
+  /* RECLAMO FORM */
+  .form-field {
+    margin-bottom: 16px;
+  }
+  .form-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: var(--accent);
+  }
+  .form-field textarea { resize: vertical; min-height: 80px; }
+  .form-field select option { background: var(--surface2); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <span>Panel de gestión</span>
+    <h1>Alquileres<br>PYME</h1>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item active" onclick="showSection('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-label">Gestión</div>
+    <div class="nav-item" onclick="showSection('inquilinos')">
+      <span class="icon">👤</span> Inquilinos
+    </div>
+    <div class="nav-item" onclick="showSection('propiedades')">
+      <span class="icon">🏠</span> Propiedades
+    </div>
+    <div class="nav-item" onclick="showSection('pagos')">
+      <span class="icon">💰</span> Pagos
+    </div>
+    <div class="nav-item" onclick="showSection('reclamos')">
+      <span class="icon">📢</span> Reclamos
+    </div>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <section class="section active" id="dashboard">
+    <div class="header">
+      <div>
+        <h2>Dashboard</h2>
+        <div class="header-sub">Resumen general del mes</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card purple">
+        <div class="stat-label">Inquilinos activos</div>
+        <div class="stat-value" id="stat-inquilinos">4</div>
+        <div class="stat-desc">propiedades ocupadas</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Pagos al día</div>
+        <div class="stat-value" id="stat-pagados">3</div>
+        <div class="stat-desc">este mes</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Vencen pronto</div>
+        <div class="stat-value" id="stat-vencen">1</div>
+        <div class="stat-desc">en los próximos 5 días</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Reclamos</div>
+        <div class="stat-value" id="stat-reclamos">2</div>
+        <div class="stat-desc">pendientes</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">⚠️ Alertas del día</div>
+      </div>
+      <div id="alertas-list" style="padding:16px 24px;">
+        <div class="alert">🔔 Juan Pérez — vence el 18/05/2026 — Pendiente de pago</div>
+        <div class="alert">📢 María Paz — reclamo pendiente: "Se rompió el calefón"</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INQUILINOS -->
+  <section class="section" id="inquilinos">
+    <div class="header">
+      <div>
+        <h2>Inquilinos</h2>
+        <div class="header-sub">Gestión de inquilinos activos</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Lista de inquilinos</div>
+        <input class="search" type="text" placeholder="🔍 Buscar inquilino..." oninput="filtrarTabla(this,'tabla-inquilinos')">
+      </div>
+      <table id="tabla-inquilinos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Venc. Contrato</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>INQ001</td><td>Juan Pérez</td><td>3514567890</td><td>juan@gmail.com</td><td>01/01/2027</td>
+            <td><span class="badge green">Activo</span></td>
+            <td><button class="action-btn" onclick="verInquilino('INQ001','Juan Pérez','12345678','3514567890','juan@gmail.com','01/01/2026','01/01/2027','ICL')">Ver ficha</button></td>
+          </tr>
+          <tr>
+            <td>INQ002</td><td>María Paz</td><td>3516789012</td><td>maria@gmail.com</td><td>15/06/2026</td>
+            <td><span class="badge green">Activo</span></td>
+            <td><button class="action-btn" onclick="verInquilino('INQ002','María Paz','23456789','3516789012','maria@gmail.com','15/06/2025','15/06/2026','IPC')">Ver ficha</button></td>
+          </tr>
+          <tr>
+            <td>INQ003</td><td>María Stella</td><td>3518901234</td><td>stella@gmail.com</td><td>30/09/2026</td>
+            <td><span class="badge green">Activo</span></td>
+            <td><button class="action-btn" onclick="verInquilino('INQ003','María Stella','34567890','3518901234','stella@gmail.com','30/09/2025','30/09/2026','ICL')">Ver ficha</button></td>
+          </tr>
+          <tr>
+            <td>INQ004</td><td>Abelardo Adolfo</td><td>3512345678</td><td>abelardo@gmail.com</td><td>23/05/2026</td>
+            <td><span class="badge yellow">Por vencer</span></td>
+            <td><button class="action-btn" onclick="verInquilino('INQ004','Abelardo Adolfo','45678901','3512345678','abelardo@gmail.com','23/05/2025','23/05/2026','Fijo')">Ver ficha</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PROPIEDADES -->
+  <section class="section" id="propiedades">
+    <div class="header">
+      <div>
+        <h2>Propiedades</h2>
+        <div class="header-sub">Estado de las propiedades</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Lista de propiedades</div>
+        <input class="search" type="text" placeholder="🔍 Buscar propiedad..." oninput="filtrarTabla(this,'tabla-propiedades')">
+      </div>
+      <table id="tabla-propiedades">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Dirección</th>
+            <th>Tipo</th>
+            <th>Inquilino</th>
+            <th>Monto</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PROP001</td><td>Av. Colón 123</td><td>Casa</td><td>Juan Pérez</td><td>$150.000</td><td>Día 18</td>
+            <td><span class="badge green">Ocupada</span></td>
+          </tr>
+          <tr>
+            <td>PROP002</td><td>Bv. San Juan 456</td><td>Depto</td><td>María Paz</td><td>$200.000</td><td>Día 10</td>
+            <td><span class="badge green">Ocupada</span></td>
+          </tr>
+          <tr>
+            <td>PROP003</td><td>Calle Lima 789</td><td>Local</td><td>María Stella</td><td>$4.000</td><td>Día 10</td>
+            <td><span class="badge green">Ocupada</span></td>
+          </tr>
+          <tr>
+            <td>PROP004</td><td>Av. Vélez 321</td><td>Casa</td><td>Abelardo Adolfo</td><td>$80.000</td><td>Día 23</td>
+            <td><span class="badge yellow">Por vencer</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PAGOS -->
+  <section class="section" id="pagos">
+    <div class="header">
+      <div>
+        <h2>Pagos</h2>
+        <div class="header-sub">Historial y estado de pagos</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Historial de pagos</div>
+        <input class="search" type="text" placeholder="🔍 Buscar pago..." oninput="filtrarTabla(this,'tabla-pagos')">
+      </div>
+      <table id="tabla-pagos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Inquilino</th>
+            <th>Mes</th>
+            <th>Monto</th>
+            <th>Fecha vencimiento</th>
+            <th>Fecha de pago</th>
+            <th>Estado</th>
+            <th>Comprobante</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PAG001</td><td>Juan Pérez</td><td>Mayo 2026</td><td>$150.000</td><td>18/05/2026</td><td>08/05/2026</td>
+            <td><span class="badge green">Pagado</span></td><td>1111</td>
+          </tr>
+          <tr>
+            <td>PAG002</td><td>María Paz</td><td>Mayo 2026</td><td>$200.000</td><td>10/05/2026</td><td>09/05/2026</td>
+            <td><span class="badge green">Pagado</span></td><td>45456</td>
+          </tr>
+          <tr>
+            <td>PAG003</td><td>María Stella</td><td>Mayo 2026</td><td>$4.000</td><td>10/05/2026</td><td>10/05/2026</td>
+            <td><span class="badge green">Pagado</span></td><td>487</td>
+          </tr>
+          <tr>
+            <td>PAG004</td><td>Abelardo Adolfo</td><td>Mayo 2026</td><td>$80.000</td><td>23/05/2026</td><td>—</td>
+            <td><span class="badge yellow">Pendiente</span></td><td>4765</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- RECLAMOS -->
+  <section class="section" id="reclamos">
+    <div class="header">
+      <div>
+        <h2>Reclamos y Avisos</h2>
+        <div class="header-sub">Canal de comunicación con inquilinos</div>
+      </div>
+      <button class="btn" onclick="document.getElementById('modal-reclamo').classList.add('open')">+ Nuevo reclamo</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Lista de reclamos</div>
+        <input class="search" type="text" placeholder="🔍 Buscar reclamo..." oninput="filtrarTabla(this,'tabla-reclamos')">
+      </div>
+      <table id="tabla-reclamos">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Inquilino</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>REC001</td><td>María Paz</td><td><span class="badge red">Reclamo</span></td>
+            <td>Se rompió el calefón</td><td>12/05/2026</td>
+            <td><span class="badge yellow">Pendiente</span></td>
+          </tr>
+          <tr>
+            <td>REC002</td><td>Juan Pérez</td><td><span class="badge purple">Aviso</span></td>
+            <td>Me voy de viaje del 20 al 25</td><td>13/05/2026</td>
+            <td><span class="badge green">Resuelto</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL INQUILINO -->
+<div class="modal-overlay" id="modal-inquilino">
+  <div class="modal">
+    <h3 id="modal-nombre">Ficha del inquilino</h3>
+    <div class="modal-sub">Datos personales</div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>ID</label><div class="value" id="m-id"></div></div>
+      <div class="modal-field"><label>DNI</label><div class="value" id="m-dni"></div></div>
+      <div class="modal-field"><label>Teléfono</label><div class="value" id="m-tel"></div></div>
+      <div class="modal-field"><label>Email</label><div class="value" id="m-email"></div></div>
+    </div>
+    <hr class="divider">
+    <div class="modal-sub">Contrato</div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Inicio contrato</label><div class="value" id="m-inicio"></div></div>
+      <div class="modal-field"><label>Vencimiento contrato</label><div class="value" id="m-venc"></div></div>
+      <div class="modal-field"><label>Índice actualización</label><div class="value" id="m-indice"></div></div>
+    </div>
+    <button class="modal-close" onclick="document.getElementById('modal-inquilino').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL NUEVO RECLAMO -->
+<div class="modal-overlay" id="modal-reclamo">
+  <div class="modal">
+    <h3>Nuevo reclamo / aviso</h3>
+    <div class="form-field">
+      <label>Inquilino</label>
+      <select>
+        <option>Juan Pérez</option>
+        <option>María Paz</option>
+        <option>María Stella</option>
+        <option>Abelardo Adolfo</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Tipo</label>
+      <select>
+        <option>Reclamo</option>
+        <option>Sugerencia</option>
+        <option>Aviso</option>
+        <option>Consulta</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Descripción</label>
+      <textarea placeholder="Describí el reclamo o aviso..."></textarea>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button class="btn">Guardar</button>
+      <button class="modal-close" onclick="document.getElementById('modal-reclamo').classList.remove('open')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  function verInquilino(id, nombre, dni, tel, email, inicio, venc, indice) {
+    document.getElementById('modal-nombre').textContent = nombre;
+    document.getElementById('m-id').textContent = id;
+    document.getElementById('m-dni').textContent = dni;
+    document.getElementById('m-tel').textContent = tel;
+    document.getElementById('m-email').textContent = email;
+    document.getElementById('m-inicio').textContent = inicio;
+    document.getElementById('m-venc').textContent = venc;
+    document.getElementById('m-indice').textContent = indice;
+    document.getElementById('modal-inquilino').classList.add('open');
+  }
+
+  function filtrarTabla(input, tablaId) {
+    const filtro = input.value.toLowerCase();
+    const filas = document.querySelectorAll(`#${tablaId} tbody tr`);
+    filas.forEach(fila => {
+      fila.style.display = fila.textContent.toLowerCase().includes(filtro) ? '' : 'none';
+    });
+  }
+
+  // Cerrar modales al hacer clic fuera
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>
