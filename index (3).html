@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Alquileres</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --accent: #6c63ff;
+    --green: #2ecc71;
+    --yellow: #f1c40f;
+    --red: #e74c3c;
+    --text: #e8eaf0;
+    --text2: #8b90a7;
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; }
+  .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; position: fixed; height: 100vh; }
+  .logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); }
+  .logo h1 { font-family: var(--font-display); font-size: 22px; line-height: 1.2; }
+  .logo span { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; }
+  .nav { padding: 24px 12px; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: var(--text2); font-size: 14px; font-weight: 500; transition: all 0.2s; margin-bottom: 4px; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent); color: white; }
+  .nav-item .icon { font-size: 18px; width: 24px; text-align: center; }
+  .nav-label { padding: 16px 24px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text2); font-weight: 600; }
+  .main { margin-left: 240px; flex: 1; padding: 32px; min-height: 100vh; }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .header h2 { font-family: var(--font-display); font-size: 28px; }
+  .header-sub { color: var(--text2); font-size: 13px; margin-top: 2px; }
+  .refresh-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.purple::before { background: var(--accent); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); font-weight: 600; margin-bottom: 8px; }
+  .stat-value { font-family: var(--font-display); font-size: 32px; }
+  .stat-desc { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .table-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .table-title { font-size: 15px; font-weight: 600; }
+  .search { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; color: var(--text); font-family: var(--font-body); font-size: 13px; width: 220px; outline: none; }
+  .search:focus { border-color: var(--accent); }
+  .search::placeholder { color: var(--text2); }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 12px 24px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); font-weight: 600; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  td { padding: 14px 24px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge.green { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge.yellow { background: rgba(241,196,15,0.15); color: var(--yellow); }
+  .badge.red { background: rgba(231,76,60,0.15); color: var(--red); }
+  .badge.purple { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .action-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-family: var(--font-display); font-size: 22px; margin-bottom: 24px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .modal-field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); font-weight: 600; margin-bottom: 6px; }
+  .modal-field .value { font-size: 15px; padding: 10px 14px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
+  .modal-close { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font-body); font-size: 14px; margin-top: 8px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .modal-sub { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); font-weight: 600; margin-bottom: 12px; }
+  .alert { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); border-radius: 10px; padding: 14px 18px; margin-bottom: 12px; font-size: 13px; color: var(--red); }
+  .loading { text-align: center; padding: 48px; color: var(--text2); font-size: 14px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <span>Panel de gestión</span>
+    <h1>Alquileres<br>PYME</h1>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item active" onclick="showSection('dashboard', this)"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-label">Gestión</div>
+    <div class="nav-item" onclick="showSection('inquilinos', this)"><span class="icon">👤</span> Inquilinos</div>
+    <div class="nav-item" onclick="showSection('propiedades', this)"><span class="icon">🏠</span> Propiedades</div>
+    <div class="nav-item" onclick="showSection('pagos', this)"><span class="icon">💰</span> Pagos</div>
+  </nav>
+</aside>
+
+<main class="main">
+
+  <section class="section active" id="dashboard">
+    <div class="header">
+      <div><h2>Dashboard</h2><div class="header-sub">Resumen general</div></div>
+      <button class="refresh-btn" onclick="cargarDatos()">🔄 Actualizar</button>
+    </div>
+    <div class="stats">
+      <div class="stat-card purple"><div class="stat-label">Inquilinos activos</div><div class="stat-value" id="stat-inquilinos">—</div><div class="stat-desc">propiedades ocupadas</div></div>
+      <div class="stat-card green"><div class="stat-label">Pagos al día</div><div class="stat-value" id="stat-pagados">—</div><div class="stat-desc">este mes</div></div>
+      <div class="stat-card yellow"><div class="stat-label">Vencen pronto</div><div class="stat-value" id="stat-vencen">—</div><div class="stat-desc">próximos 5 días</div></div>
+      <div class="stat-card red"><div class="stat-label">Pendientes</div><div class="stat-value" id="stat-pendientes">—</div><div class="stat-desc">sin pagar</div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><div class="table-title">⚠️ Alertas del día</div></div>
+      <div id="alertas-list" style="padding:16px 24px;"><div class="loading"><div class="spinner"></div>Cargando datos de Google Sheets...</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="inquilinos">
+    <div class="header"><div><h2>Inquilinos</h2><div class="header-sub">Gestión de inquilinos activos</div></div></div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Lista de inquilinos</div>
+        <input class="search" type="text" placeholder="🔍 Buscar..." oninput="filtrarTabla(this,'tabla-inquilinos')">
+      </div>
+      <table id="tabla-inquilinos">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Email</th><th>Venc. Contrato</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="body-inquilinos"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Cargando...</div></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="propiedades">
+    <div class="header"><div><h2>Propiedades</h2><div class="header-sub">Estado de las propiedades</div></div></div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Lista de propiedades</div>
+        <input class="search" type="text" placeholder="🔍 Buscar..." oninput="filtrarTabla(this,'tabla-propiedades')">
+      </div>
+      <table id="tabla-propiedades">
+        <thead><tr><th>ID</th><th>Dirección</th><th>Tipo</th><th>Inquilino</th><th>Monto</th><th>Día venc.</th><th>Estado</th></tr></thead>
+        <tbody id="body-propiedades"><tr><td colspan="7"><div class="loading"><div class="spinner"></div>Cargando...</div></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="pagos">
+    <div class="header"><div><h2>Pagos</h2><div class="header-sub">Historial y estado de pagos</div></div></div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Historial de pagos</div>
+        <input class="search" type="text" placeholder="🔍 Buscar..." oninput="filtrarTabla(this,'tabla-pagos')">
+      </div>
+      <table id="tabla-pagos">
+        <thead><tr><th>ID</th><th>Inquilino</th><th>Mes</th><th>Monto</th><th>Vencimiento</th><th>Fecha pago</th><th>Estado</th><th>Comprobante</th></tr></thead>
+        <tbody id="body-pagos"><tr><td colspan="8"><div class="loading"><div class="spinner"></div>Cargando...</div></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-inquilino">
+  <div class="modal">
+    <h3 id="modal-nombre">Ficha del inquilino</h3>
+    <div class="modal-sub">Datos personales</div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>ID</label><div class="value" id="m-id"></div></div>
+      <div class="modal-field"><label>DNI</label><div class="value" id="m-dni"></div></div>
+      <div class="modal-field"><label>Teléfono</label><div class="value" id="m-tel"></div></div>
+      <div class="modal-field"><label>Email</label><div class="value" id="m-email"></div></div>
+    </div>
+    <hr class="divider">
+    <div class="modal-sub">Contrato</div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Inicio</label><div class="value" id="m-inicio"></div></div>
+      <div class="modal-field"><label>Vencimiento</label><div class="value" id="m-venc"></div></div>
+      <div class="modal-field"><label>Índice</label><div class="value" id="m-indice"></div></div>
+      <div class="modal-field"><label>Estado</label><div class="value" id="m-estado"></div></div>
+    </div>
+    <button class="modal-close" onclick="document.getElementById('modal-inquilino').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  const API_KEY = 'AIzaSyCeey5hWJ6UtlMY7IKqOWAtaRXrb7AqqAk';
+  const SHEET_ID = '1g84snJxapA-yEHtRidmuAzv9nKikvwEn0jO4PXQQfDs';
+
+  async function fetchSheet(range) {
+    try {
+      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`);
+      const data = await res.json();
+      return data.values || [];
+    } catch(e) {
+      console.error('Error fetching sheet:', e);
+      return [];
+    }
+  }
+
+  function badge(estado) {
+    if (!estado) return '<span class="badge yellow">—</span>';
+    const e = estado.toLowerCase();
+    if (['activo','pagado','ocupada','resuelto'].some(x => e.includes(x))) return `<span class="badge green">${estado}</span>`;
+    if (['pendiente','por vencer','en proceso'].some(x => e.includes(x))) return `<span class="badge yellow">${estado}</span>`;
+    if (['atrasado','cancelado','inactivo','libre'].some(x => e.includes(x))) return `<span class="badge red">${estado}</span>`;
+    return `<span class="badge purple">${estado}</span>`;
+  }
+
+  async function cargarInquilinos() {
+    const rows = await fetchSheet('INQUILINOS!A2:I100');
+    const tbody = document.getElementById('body-inquilinos');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text2)">No hay inquilinos cargados</td></tr>'; return rows; }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[3]||''}</td><td>${r[4]||''}</td><td>${r[6]||''}</td>
+        <td>${badge(r[8]||'Activo')}</td>
+        <td><button class="action-btn" onclick='verInquilino(${JSON.stringify(r)})'>Ver ficha</button></td>
+      </tr>`).join('');
+    document.getElementById('stat-inquilinos').textContent = rows.length;
+    return rows;
+  }
+
+  async function cargarPropiedades() {
+    const rows = await fetchSheet('PROPIEDADES!A2:G100');
+    const tbody = document.getElementById('body-propiedades');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text2)">No hay propiedades cargadas</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td><td>${r[4]||''}</td><td>Día ${r[5]||''}</td>
+        <td>${badge(r[6]||'Ocupada')}</td>
+      </tr>`).join('');
+  }
+
+  async function cargarPagos() {
+    const rows = await fetchSheet('PAGOS!A2:L100');
+    const tbody = document.getElementById('body-pagos');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text2)">No hay pagos cargados</td></tr>'; return; }
+
+    let pagados = 0, pendientes = 0, vencen = 0;
+    const alertas = [];
+
+    tbody.innerHTML = rows.map(r => {
+      const estado = r[7] || 'Pendiente';
+      const nombre = r[11] || r[1] || '';
+      if (estado.toLowerCase().includes('pagado')) pagados++;
+      else { pendientes++; alertas.push(`🔔 ${nombre} — vence el ${r[5]||''} — ${estado}`); }
+      if ((r[9]||'') === 'SI') vencen++;
+      return `<tr>
+        <td>${r[0]||''}</td><td>${nombre}</td><td>${r[3]||''}</td><td>${r[4]||''}</td>
+        <td>${r[5]||''}</td><td>${r[6]||'—'}</td><td>${badge(estado)}</td><td>${r[8]||'—'}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('stat-pagados').textContent = pagados;
+    document.getElementById('stat-pendientes').textContent = pendientes;
+    document.getElementById('stat-vencen').textContent = vencen;
+
+    const al = document.getElementById('alertas-list');
+    al.innerHTML = alertas.length
+      ? alertas.map(a => `<div class="alert">${a}</div>`).join('')
+      : '<div style="padding:16px;color:var(--green);font-size:14px;">✅ Todo al día, sin alertas pendientes.</div>';
+  }
+
+  function verInquilino(r) {
+    document.getElementById('modal-nombre').textContent = r[1]||'—';
+    document.getElementById('m-id').textContent = r[0]||'—';
+    document.getElementById('m-dni').textContent = r[2]||'—';
+    document.getElementById('m-tel').textContent = r[3]||'—';
+    document.getElementById('m-email').textContent = r[4]||'—';
+    document.getElementById('m-inicio').textContent = r[5]||'—';
+    document.getElementById('m-venc').textContent = r[6]||'—';
+    document.getElementById('m-indice').textContent = r[7]||'—';
+    document.getElementById('m-estado').textContent = r[8]||'Activo';
+    document.getElementById('modal-inquilino').classList.add('open');
+  }
+
+  function showSection(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+
+  function filtrarTabla(input, tablaId) {
+    const f = input.value.toLowerCase();
+    document.querySelectorAll(`#${tablaId} tbody tr`).forEach(tr => {
+      tr.style.display = tr.textContent.toLowerCase().includes(f) ? '' : 'none';
+    });
+  }
+
+  async function cargarDatos() {
+    await Promise.all([cargarInquilinos(), cargarPropiedades(), cargarPagos()]);
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+
+  cargarDatos();
+</script>
+</body>
+</html>
